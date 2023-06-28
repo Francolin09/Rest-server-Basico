@@ -1,53 +1,87 @@
-const {response} = require('express')
+const { response } = require('express')
+const bcryptsjs = require('bcryptjs');
 
-//acá el res no existe por tanto desestructuramos response y decimos que res = response
-//para que asi adquiera sus propiedades y toda esa mierda
-// const usuariosGet = (req, res = response) =>{ 
-//     res.json({
-//         msg:'Get APi - controlador'
-//     })
-// }
+const Usuario = require('../models/usuario');
 
-const usuariosGet = (req, res = response) =>{ 
-    const query = req.query; //Esta propiedad al ser opcional no es necesaria declararla en la ruta del metodo get 
+
+const usuariosGet = async (req, res = response) => {
+    const query = req.query; 
+    const [total, usuarios] = await Promise.all([ 
+        Usuario.countDocuments({estado:true}),
+        Usuario.find({estado:true})
+         .skip(Number(desde))
+         .limit(Number(limite)) 
+
+    ])
+
     res.json({
-        msg:'Get APi - controlador',
-        query
+        msg: 'Get APi - controlador',
+        total,
+        usuarios
+
     })
 }
 
-// const usuariosPost = (req, res = response) =>{ 
-//     res.json({
-//         msg:'Post APi - controlador'
-//     })
-// } este es el base pero ahora haremos lo mismo rescatando el body que venga
+const usuariosPost = async (req, res = response) => {
 
-const usuariosPost = (req, res = response) =>{ 
-    const body = req.body;
+
+    const { nombre, correo, password, rol } = req.body;
+    const usuario = new Usuario({ nombre, correo, password, rol });
+
+
+    //encriptar la contraseña
+    const salt = bcryptsjs.genSaltSync();
+    usuario.password = bcryptsjs.hashSync(password, salt)
+
+    //guardar en bd
+    await usuario.save();
     res.json({
-        msg:'Post APi - controlador',
-        body
+        msg: 'Post APi - controlador',
+        usuario
     })
 }
 
-// const usuariosPut = (req, res = response) =>{ 
-//     res.json({
-//         msg:'Put APi - controlador'
-//     })
-// }
 
-const usuariosPut = (req, res = response) =>{ 
-    const id = req.params.id;              //Para que este id funcione hay que cambiar el método en las rutas, anda pa alla a ver
+
+const usuariosPut = async (req, res = response) => {
+    const { id } = req.params;             
+    const { password, google, correo, _id, ...resto } = req.body; 
+    
+    if (password) {
+        //encriptar la contraseña
+        const salt = bcryptsjs.genSaltSync();
+        resto.password = bcryptsjs.hashSync(password, salt);
+    }
+    const usuario = await Usuario.findByIdAndUpdate(id, resto, { new: true })
+
+
     res.json({
-        msg:'Put APi - controlador',
-        id
+        msg: 'Put APi - controlador',
+        usuario
+
     })
 }
 
-const usuariosDelete = (req, res = response) =>{ 
+
+
+const usuariosDelete = async(req, res = response) => {
+    const {id} =req.params
+    //Borrar fisicamente (No tan recomendado)
+    // const usuario = await Usuario.findByIdAndDelete(id)
+
+    //const uid = req.uid;//51 aca le asignamos el valor esto funciona porque todo viene como en cadena pero al final no era asi, asi que comentamos toda la mierda
+
+    //Borrar pero de a mentiritas
+    const usuario = await Usuario.findByIdAndUpdate(id,{estado:false})
+    const usuarioAutenticado = req.usuario; //58 entonces aqui asignamos al usuario completo que esta haciendo la request
     res.json({
-        msg:'Delete APi - controlador'
+        msg: 'Delete APi - controlador /Se ha borrado el siguiente usuario',
+        usuario,
+        //uid //52 y aca le tiramos el uid de nuevo pa que lo muestre
+        //53 ahora VAMOS a querer obtener la info del usuario autenticado, para eso nos vamos a validarjwt
+        usuarioAutenticado //59 y ahora a la respuesta le pasamos el usuario autenticado entonces nos muestra ambos usuarios
+                           //60 ahora el paso siguiente es validar si el usuario esta activa y si lo está que pueda borrarse, sino, no, vamos al validarjwt
     })
 }
 
-module.exports = { usuariosGet,usuariosPost,usuariosPut,usuariosDelete }
+module.exports = { usuariosGet, usuariosPost, usuariosPut, usuariosDelete }
