@@ -33,8 +33,7 @@ router.put('/:id',[
 ],usuariosPut) 
 
 router.delete('/:id',[
-    validarJWT,//44 aca chantamos el middleware para que sea el primero en validarse
-    //esAdminRol,//69 ponemos el middleware y listo, pero ahora haremos otra validacion de rol asi que volvamos al validarRoles
+    validarJWT,
     tieneRol('ADMIN_ROL','VENTAS_ROL'),
     check('id','No es un id Válido, tontito').isMongoId(),
     check('id').custom(existeUsuarioPorId),

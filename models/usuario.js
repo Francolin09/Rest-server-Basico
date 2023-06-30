@@ -22,7 +22,8 @@ const UsuarioSchema = Schema({
     rol:{
         type:String,
         required: true,
-        emun:['ADMIN_ROL','USER_ROL'] //ESTO LE DICE QUE PUEDE SER UNO O EL OTRO
+        emun:['ADMIN_ROL','USER_ROL'], //ESTO LE DICE QUE PUEDE SER UNO O EL OTRO
+        default:'USER_ROLE'
     },
     estado:{
         type:Boolean,
@@ -35,12 +36,11 @@ const UsuarioSchema = Schema({
 })
 
 UsuarioSchema.methods.toJSON = function(){
-    const {__v,password,_id,...usuario} = this.toObject(); //37 aca el tio quiere que ya no se vea el _id, que aparezca como uid pero sin cambiarle el nombre en la bd, para eso desestructuramos el _id
-    usuario.uid = _id; //38 entonces aqui agregamos a usuario una propiedad llamada uid que tendrá el mismo valor del id y esa si se mostrará, listo listón
+    const {__v,password,_id,...usuario} = this.toObject(); 
+    usuario.uid = _id; 
     return usuario;
 }
-//39 ya hasta este punto tenemos todo bien pero ahora debemos implementar este jwt para las rutas especificamente para el delete
-//Entonces si yo quiero proteger una ruta debo hacer un middleware asi que crearemos el middelware llamado validarjwt
+
 
 
 

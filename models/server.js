@@ -5,7 +5,7 @@ const { dbConnection } = require('../database/config');
 class Server {
     constructor(){
         this.app = express();
-        this.authPath = '/api/auth'; //1 crearemos esta variable de mierda con una ruta
+        this.authPath = '/api/auth'; 
 
         this.conectarDB();
 

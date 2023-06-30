@@ -1,17 +1,23 @@
-const {Router} = require('express'); //4 importamos lo que vamos a necesitar
+const {Router} = require('express'); 
 const {check} = require('express-validator');
 const { usuariosGet } = require('../controllers/rutas');
-const { login } = require('../controllers/auth');
+const { login, googleSignIn } = require('../controllers/auth');
 const { validarCampos } = require('../middlewares/validarCampos');
 
 const router = Router();
 
 router.post('/login',[
-    check('correo','El correo es obligatorio, tontito').isEmail(), //10 creamos los middlewares, acuerdate que 
-    check('password', 'La contraseña es obligatoria, tontito').not().isEmpty(),//para que funcionen hay poner el validarCampos
+    check('correo','El correo es obligatorio, tontito').isEmail(), 
+    check('password', 'La contraseña es obligatoria, tontito').not().isEmpty(),
     validarCampos
-] ,login ) //4.5y tomamos un metodo para probarlo // 8 aca lo llamamos //9 anda a probar esta ruta a postman, corre
-//5 teniendo esto nos vamos a crear el controlador de auth
+] ,login ) 
 
+//4 creamos un nueva ruta para gogle
+router.post('/google',[
+    check('id_token','El id de google es obligatorio, tontito').not().isEmpty(), //5 dejamos solo un campo que sera la validacion de si viene algo o no, ahora hay que ir a crear el controlador
+    
+    validarCampos
+] ,googleSignIn ) //9 agregamos el controlador acá 
+                  //10 ahora bien esto es solo un ejercicio simulando un token, pero ahora iremos al html para manejar el token que de verdad estamos recibiendo
 
 module.exports = router;

@@ -1,7 +1,7 @@
-const mongoose = require('mongoose')//paso 1
+const mongoose = require('mongoose')
 
 
-const dbConnection = async()=>{ //paso2
+const dbConnection = async()=>{ 
     try {
        await mongoose.connect(process.env.MONGODB_ATLAS)
        console.log('Base de datos en linea yaaaay')

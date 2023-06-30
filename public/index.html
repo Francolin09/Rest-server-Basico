@@ -3,10 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acceso Denegado</title>
+    <title>Google SingIn</title>
 </head>
 <body>
-    <h1>Acceso Denegado!!!!!!!!!!!!</h1>
+     <h1>Google Sign In</h1> <!--1 cambiar estas cuestiones que pusimos al principio y ponerles google sign in -->
+
+     <!-- 2 copiamos el script de google al final del body y copiamos y pegamos el codigo este que es un boton de google: -->
+
+     <div id="g_id_onload"
+         data-client_id="457144038355-3gq8tdlq93ehlipiefbdbka18khht3kv.apps.googleusercontent.com"
+         data-callback="handleCredentialResponse"
+         data-auto_prompt="false">
+      </div>
+      <div class="g_id_signin"
+         data-type="standard"
+         data-size="large"
+         data-theme="outline"
+         data-text="sign_in_with"
+         data-shape="rectangular"
+         data-logo_alignment="left">
+      </div>
+      <!-- 32 crearemos el boton de logout -->
+
+      <button id="signout">
+        Signout
+      </button>
+
+
+
+      <script>
+        function handleCredentialResponse(response) {
+          const body ={id_token : response.credential} //13 aca definimos que id_token será igual a la propiedad credential que trae la respuesta
+           
+             console.log('id_token', response.credential) //3 lo que hacemos aca es borrar todo lo que trae por defecto y mostrar el token de quien ingresa 
+
+             fetch('http://localhost:3000/api/auth/google',{ //11 usando un fetch y con un then recibimos lo que venga
+                method:'POST',                               //acordueta que si no pones el metodo por defecto es un get
+                headers: {'Content-Type':'Application/json'
+                },
+                body:JSON.stringify(body) //12 pero el token debe venir en el body para eso crearemos una constante arriba
+              }) 
+              .then( resp => resp.json()) //11.1primero lo desserializamos
+              .then(resp => { //11.2 y despues a esa respuesta deserializada la mostramos
+                console.log(resp)
+                localStorage.setItem('email',resp.usuario.correo)//34 definimos la variable email que se guardara en el localstorage
+              })
+              .catch(console.warn) //11.3si sale mal una advertencia
+        } //14 en este punto ya recibimos el token en el back lo que debemos hacer ahora es validar ese token para eso hay que instalar el paquete google_auth_library
+           //15 una vez instalado nos creamos un helper que se llamara google-verify
+        const boton =   document.getElementById('signout') //33 creamos el metodo para salir
+        boton.onclick = () => {
+          console.log(google.accounts.id)
+          google.accounts.id.disableAutoSelect()
+
+          google.accounts.id.revoke( localStorage.getItem('email'), done => { //35 aqui borramos los datos del email guardado en el local storage
+            localStorage.clear();
+            location.reload();
+          })
+        }
+      </script>
+
+
+
+
+
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     
 </body>
 </html>
